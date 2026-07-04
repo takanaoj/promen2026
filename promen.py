@@ -30,17 +30,17 @@ class AttackCircle:
         self.flag=True
         self.goalr=100
         self.currentr=0
-        self.pos=[]
+        self.pos=centerpos[0]
     
     def gradual(self):
         Growtime=3
         self.currentr=self.currentr+self.goalr/Growtime*dt
-        for pos in self.pos:
-            if self.currentr<self.goalr-0.5:
-                pygame.draw.circle(grid,(200,10,10,64),pos,self.currentr)
-            else:
-                pygame.draw.circle(grid,(200,10,10,255),pos,self.currentr)
-            
+        
+        if self.currentr<self.goalr-0.5:
+            pygame.draw.circle(grid,(200,10,10,64),self.pos,self.currentr)
+        else:
+            pygame.draw.circle(grid,(200,10,10,255),self.pos,self.currentr)
+        
         return self.currentr
     
     def flagupdate(self):
@@ -50,10 +50,39 @@ class AttackCircle:
         else :
             self.flag=False
 
-    def setpos(self):
+    def setpos(self,available):
         if(self.flag):
-            self.pos=random.sample(centerpos,random.randint(1,8))
+            self.pos=random.choice(available)
+        return self.pos
+    
+class bulletManager:
+    def __init__(self):
+        self.bullets=[]
+        self.availablepos=centerpos.copy()
+        self.numberbullets=0
+        self.count=0
+    def makebullets(self):
+        if self.numberbullets<9:
+            self.bullets.append(AttackCircle())
 
+    def updates(self):
+        for bullet in self.bullets:
+            bullet.flagupdate()
+    
+    def set(self):
+        for bullet in self.bullets:
+            self.availablepos.remove(bullet.setpos(self.availablepos))
+
+    def remove(self):
+        using=[]
+        for bullet in self.bullets:
+            if bullet.flag:
+                using.append(bullet)
+                self.availablepos.append(bullet.pos)
+        self.bullets=using
+    def blits(self):
+        for bullet in self.bullets:
+            bullet.gradual()
 pygame.init()
 baseW,baseH=1920,1080
 baseSurface=pygame.Surface((baseW,baseH),SRCALPHA)
@@ -90,9 +119,10 @@ goalr=100
 cradius=0
 circleflag=True
 clock=pygame.time.Clock()
-dt=clock.tick(60)/1000
+
 running =True
 bullet=AttackCircle()
+Manager=bulletManager()
 while running:
     dt=clock.tick(60)/1000
     for event in pygame.event.get():
@@ -126,14 +156,14 @@ while running:
         pygame.draw.line(grid,(255,255,255,127),(LineX,LineY+gap*i),(LineX+gap*3,LineY+gap*i),width=5)
         pygame.draw.line(grid,(255,255,255,127),(LineX+gap*i,LineY),(LineX+gap*i,LineY+gap*3),width=5)
     
-    
-    bullet.setpos()
+    Manager.makebullets()    
+    Manager.set()
         
-    bullet.gradual()
-
-
-    bullet.flagupdate()
     
+
+
+    Manager.blits()
+    Manager.updates()
 
     baseSurface.blit(grid,(0,0))
     baseSurface.blit(playerimg,(playerX,playerY))
@@ -142,6 +172,7 @@ while running:
     playerXChange=0
     playerYChange=0
     screen.blit(scaledSurface,(0,0))
+    Manager.remove()
     pygame.display.flip()
 
 pygame.quit()
