@@ -3,6 +3,7 @@ import sys
 from pygame.locals import *
 import random
 
+totalpause=0
 def fit_square(img_path,size):
     img=pygame.image.load(img_path).convert_alpha()
     img_w,img_h=img.get_size()
@@ -24,6 +25,9 @@ def fit_square(img_path,size):
     canvas.blit(img,(offsetX,offsetY))
     return canvas
 
+def game_time(totalpause):#ゲーム内時間を取得する:
+    return pygame.time.get_ticks()-totalpause
+    
 
 class AttackCircle:
     def __init__(self,x,y):
@@ -32,7 +36,7 @@ class AttackCircle:
         self.currentr=0
         self.indexs=[x,y]
         self.pos=centerpos[y][x]
-        self.time=pygame.time.get_ticks()
+        self.time=game_time(totalpause)
         self.wait=random.uniform(500,5000)
         self.dt=self.time
         self.holdtime=300#ミリ秒
@@ -41,7 +45,7 @@ class AttackCircle:
             return
         elif self.state=="growing":
             dt=(ct-self.dt)/1000
-            Growtime=15
+            Growtime=1.8#最大までの秒数
             self.currentr=self.currentr+self.goalr/Growtime*dt
             self.dt=ct
             if self.currentr<self.goalr-0.5:
@@ -133,27 +137,46 @@ cradius=0
 circleflag=True
 clock=pygame.time.Clock()
 
-running =True
-Manager=bulletManager()
-Manager.makebullets()
+running =True#ゲーム起動中かどうか
+
+Manager=bulletManager()#敵攻撃の一括管理用クラス
+Manager.makebullets()#敵攻撃インスタンスをマス目それぞれに一括作成
+
+gamestate="Guard" #ゲームの状況をあらわすAttack Guard Start 
+ispaused=False#ポーズ中かどうか
+
 
 while running:
-    currenttime=pygame.time.get_ticks()
+    
     clock.tick(60)
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             running =False
         
         if event.type==pygame.KEYDOWN:
-            if event.key ==pygame.K_LEFT:
-                playerX-=1
-            if event.key == pygame.K_RIGHT:
-                playerX +=1
-            if event.key ==pygame.K_UP:
-                playerY -=1
-            if event.key == pygame.K_DOWN:
-                playerY += gap
+            if event.key==pygame.K_ESCAPE:
+                if ispaused:
+                    ispaused = False
+                    pausefinish = pygame.time.get_ticks()
+                    totalpause += pausefinish-pausestart
+                else:
+                    ispaused = True
+                    pausestart = pygame.time.get_ticks()
+        if not ispaused:
+            if event.type==pygame.KEYDOWN:
+                if event.key ==pygame.K_LEFT:
+                    playerX-=1
+                if event.key == pygame.K_RIGHT:
+                    playerX +=1
+                if event.key ==pygame.K_UP:
+                    playerY -=1
+                if event.key == pygame.K_DOWN:
+                    playerY += 1            
+    if ispaused:
+        continue
     
+    currenttime=game_time(totalpause)
+
     if playerX <= 0:
         playerX = 0
     elif playerX >= 2:
@@ -168,7 +191,9 @@ while running:
     
     
     baseSurface.blit(background,(0,0))
+    #枠線や攻撃表示用の半透明surfase
     grid=pygame.Surface((baseW,baseH),pygame.SRCALPHA)
+    #枠線表示
     for i in range(4):
         pygame.draw.line(grid,(255,255,255,127),(LineX,LineY+gap*i),(LineX+gap*3,LineY+gap*i),width=5)
         pygame.draw.line(grid,(255,255,255,127),(LineX+gap*i,LineY),(LineX+gap*i,LineY+gap*3),width=5)
