@@ -1,6 +1,7 @@
 import pygame 
 from pygame.locals import *
 import random 
+import os
 
 
 pygame.init()
@@ -338,6 +339,7 @@ def read_savedata(difficulty,player):
                     elif tmplist[0]=='playerpower':
                         player.power=int(tmplist[1])
     except FileNotFoundError:
+        os.makedirs("save", exist_ok=True)
         pass
 def save_savedata(difficulty,player):
     path ='save/save.txt'    
@@ -500,14 +502,15 @@ class Movingground:
             progress = max(0, min(1, progress))
             progress = progress ** 2
 
-            currentW = int(startW + (GoalW - startW) * progress)
-            currentH = int(startH + (GoalH - startH) * progress)
+
+
             dy=10
             y=min(ys[count]+dy,totaldy+self.Y)
             ys.append(y)
             imgs.append(self.img.subsurface(0,ys[count],self.width,ys[count+1]-ys[count]))
             
             currentW=int(startW+katamuki*(groundY))
+            currentH = int(startH + (GoalH - startH) * progress)
             imgs[count]=pygame.transform.smoothscale(imgs[count],(currentW,currentH))
             imgX,imgY=imgs[count].get_size()
             
