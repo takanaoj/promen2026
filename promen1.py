@@ -492,6 +492,7 @@ class Movingground:
         startW=baseW-1500
         startH=10
         GoalW=baseW
+        katamuki=(GoalW-startW)/(HorizonY)
         GoalH=50
         
         while(groundY<baseH-HorizonY):
