@@ -3,8 +3,6 @@ from pygame.locals import *
 import random 
 
 
-
-
 pygame.init()
 pygame.mixer.init()
 pygame.display.set_caption("鶏を救え")
@@ -494,7 +492,6 @@ class Movingground:
         startW=baseW-1500
         startH=10
         GoalW=baseW
-        katamuki=(GoalW-startW)/(HorizonY)
         GoalH=50
         
         while(groundY<baseH-HorizonY):
