@@ -1,5 +1,0 @@
-difficulty:1
-maxdifficulty:1
-playerlevel:1
-playerexp:0
-playerpower:15
