@@ -182,7 +182,7 @@ class AttackCircle:
                 self.time=currenttime
     def setstatus(self,difficulty):
         self.WaitTime2=random.uniform(200,max(500-(difficulty-1)*5,300))
-        self.SpeadingTime==round(random.uniform(max(1.0,2.0-0.1*(difficulty-1),4.0),2))
+        self.SpeadingTime=round(random.uniform(max(1.0,2.0-0.1*(difficulty-1),4.0),2))
         
                 
     def isHit(self,playerX,playerY,currenttime):
